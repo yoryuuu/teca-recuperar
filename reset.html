@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restablecer Contraseña - Teca Saludable</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .card {
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+        }
+        h2 { color: #333; margin-bottom: 20px; }
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover { background-color: #218838; }
+        .message { margin-top: 15px; font-size: 14px; font-weight: bold; }
+        .error { color: #dc3545; }
+        .success { color: #28a745; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>Restablecer Contraseña</h2>
+    <p>Ingresá tu nueva contraseña para Teca Saludable</p>
+
+    <input type="password" id="newPassword" placeholder="Nueva contraseña (mínimo 6 caracteres)">
+    <input type="password" id="confirmPassword" placeholder="Confirmar contraseña">
+    
+    <button onclick="cambiarContrasena()">Guardar contraseña</button>
+
+    <div id="statusMessage" class="message"></div>
+</div>
+
+<script>
+    // ⚠️ REEMPLAZÁ ESTO CON EL TITLE ID DE TU PLAYFAB (Ejemplo: "408F")
+    const PLAYFAB_TITLE_ID = "102CAA"; 
+
+    // Obtener el token de la URL que envía PlayFab
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('token');
+
+    const messageDiv = document.getElementById('statusMessage');
+
+    if (!token) {
+        messageDiv.className = "message error";
+        messageDiv.innerText = "Error: El enlace no contiene un token válido o ya expiró.";
+    }
+
+    async function cambiarContrasena() {
+        const pass = document.getElementById('newPassword').value;
+        const confirmPass = document.getElementById('confirmPassword').value;
+
+        if (!token) {
+            messageDiv.className = "message error";
+            messageDiv.innerText = "Enlace inválido.";
+            return;
+        }
+
+        if (pass.length < 6) {
+            messageDiv.className = "message error";
+            messageDiv.innerText = "La contraseña debe tener al menos 6 caracteres.";
+            return;
+        }
+
+        if (pass !== confirmPass) {
+            messageDiv.className = "message error";
+            messageDiv.innerText = "Las contraseñas no coinciden.";
+            return;
+        }
+
+        messageDiv.className = "message";
+        messageDiv.innerText = "Guardando cambio...";
+
+        try {
+            const response = await fetch(`https://${PLAYFAB_TITLE_ID}.playfabapi.com/Client/ResetPassword`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    Token: token,
+                    Password: pass
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.code === 200) {
+                messageDiv.className = "message success";
+                messageDiv.innerText = "¡Contraseña actualizada con éxito! Ya podés abrir la app e iniciar sesión.";
+            } else {
+                messageDiv.className = "message error";
+                messageDiv.innerText = "Error: " + (data.errorMessage || "El token es inválido o ha expirado.");
+            }
+        } catch (err) {
+            messageDiv.className = "message error";
+            messageDiv.innerText = "Error de conexión con el servidor.";
+        }
+    }
+</script>
+
+</body>
+</html>
