@@ -17,40 +17,25 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            
-            /* Fondo con tu imagen */
             background: url('fondo.jpg') no-repeat center center fixed;
             background-size: cover;
-            background-color: #fca311; 
+            background-color: #f16523; 
         }
 
-        /* TÉRMINOS GLASSMORPHISM */
         .glass-card {
-            /* Fondo blanco translúcido cálido */
             background: rgba(255, 255, 255, 0.22);
-            
-            /* Desenfoque del fondo (Efecto Vidrio Esmerilado) */
             -webkit-backdrop-filter: blur(16px);
             backdrop-filter: blur(16px);
-            
-            /* Bordes redondeados sutiles */
             border-radius: 24px;
-            
-            /* Borde brillante simulación brillo de cristal */
             border: 1px solid rgba(255, 255, 255, 0.45);
             border-top: 1.5px solid rgba(255, 255, 255, 0.65);
             border-left: 1.5px solid rgba(255, 255, 255, 0.65);
-            
-            /* Sombra profunda para dar elevación 3D */
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15),
                         0 1px 3px rgba(255, 255, 255, 0.3) inset;
-            
             padding: 40px 32px;
             max-width: 400px;
             width: 100%;
             text-align: center;
-            
-            /* Margen para ubicarlo cómodo sobre la composición */
             margin-top: 100px;
         }
 
@@ -69,7 +54,6 @@
             line-height: 1.5;
         }
 
-        /* Inputs estilizados para cristal */
         input[type="password"] {
             width: 100%;
             padding: 14px 16px;
@@ -94,7 +78,6 @@
             box-shadow: 0 0 12px rgba(255, 255, 255, 0.4);
         }
 
-        /* Botón de cristal/cálido */
         button {
             width: 100%;
             padding: 15px;
@@ -128,6 +111,7 @@
             line-height: 1.4;
             padding: 10px;
             border-radius: 8px;
+            word-break: break-word;
         }
 
         .error { 
@@ -160,14 +144,15 @@
 <script>
     const PLAYFAB_TITLE_ID = "102CAA"; 
 
+    // Obtener el token de la URL (soporta ?token= o ?Token=)
     const urlParams = new URLSearchParams(window.location.search);
-    const token = urlParams.get('token');
+    const token = urlParams.get('token') || urlParams.get('Token');
 
     const messageDiv = document.getElementById('statusMessage');
 
     if (!token) {
         messageDiv.className = "message error";
-        messageDiv.innerText = "Atención: El enlace no contiene un token válido o ha expirado.";
+        messageDiv.innerText = "Atención: Para cambiar la contraseña debés ingresar desde el enlace que recibiste por correo electrónico.";
     }
 
     async function cambiarContrasena() {
@@ -176,7 +161,7 @@
 
         if (!token) {
             messageDiv.className = "message error";
-            messageDiv.innerText = "Enlace inválido o expirado.";
+            messageDiv.innerText = "Error: Falta el token de autorización de correo.";
             return;
         }
 
@@ -193,12 +178,14 @@
         }
 
         messageDiv.className = "message";
-        messageDiv.innerText = "Guardando cambios...";
+        messageDiv.innerText = "Procesando solicitud...";
 
         try {
             const response = await fetch(`https://${PLAYFAB_TITLE_ID}.playfabapi.com/Client/ResetPassword`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json'
+                },
                 body: JSON.stringify({
                     Token: token,
                     Password: pass
@@ -207,16 +194,16 @@
 
             const data = await response.json();
 
-            if (data.code === 200) {
+            if (data.code === 200 && data.status === "OK") {
                 messageDiv.className = "message success";
                 messageDiv.innerText = "¡Contraseña actualizada con éxito! Ya podés abrir la app e iniciar sesión.";
             } else {
                 messageDiv.className = "message error";
-                messageDiv.innerText = "Error: " + (data.errorMessage || "El token es inválido o ha expirado.");
+                messageDiv.innerText = "Error de PlayFab: " + (data.errorMessage || "El enlace es inválido o ya fue utilizado.");
             }
         } catch (err) {
             messageDiv.className = "message error";
-            messageDiv.innerText = "Error de conexión con el servidor.";
+            messageDiv.innerText = "Error al conectar con PlayFab. Asegurate de abrir este enlace desde el mail recibido.";
         }
     }
 </script>
