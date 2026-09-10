@@ -8,38 +8,45 @@
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
-            padding: 0;
+            padding: 20px 0;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             
-            /* Imagen de fondo configurada */
+            /* Imagen de fondo */
             background: url('fondo.jpg') no-repeat center center fixed;
             background-size: cover;
-            background-color: #e8f5e9; 
+            background-color: #f16523; 
         }
 
         .card {
-            background: rgba(255, 255, 255, 0.95);
+            /* Blanco semitransparente para que se luzca la tarjeta y el fondo */
+            background: rgba(255, 255, 255, 0.75);
             padding: 35px 30px;
             border-radius: 20px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
             max-width: 380px;
             width: 85%;
             text-align: center;
-            backdrop-filter: blur(5px);
+            backdrop-filter: blur(8px);
+            
+            /* Desplaza el cuadrado un poco más abajo */
+            margin-top: 140px;
         }
 
         h2 {
-            color: #2e7d32;
+            /* Letras del título cambiadas a blanco */
+            color: #ffffff;
             margin-top: 0;
             margin-bottom: 8px;
-            font-size: 22px;
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2); /* Sombra suave para legibilidad */
         }
 
         p {
-            color: #555;
+            color: #333333;
             font-size: 14px;
             margin-bottom: 25px;
         }
@@ -48,22 +55,24 @@
             width: 100%;
             padding: 14px;
             margin-bottom: 15px;
-            border: 2px solid #c8e6c9;
+            border: 2px solid #e0e0e0;
             border-radius: 10px;
             box-sizing: border-box;
             font-size: 15px;
             outline: none;
+            background: rgba(255, 255, 255, 0.9);
             transition: border-color 0.3s;
         }
 
         input[type="password"]:focus {
-            border-color: #4caf50;
+            border-color: #f16523;
         }
 
+        /* Botón cambiado a tono naranja */
         button {
             width: 100%;
             padding: 14px;
-            background-color: #4caf50;
+            background-color: #f16523;
             color: white;
             border: none;
             border-radius: 10px;
@@ -71,11 +80,11 @@
             font-weight: bold;
             cursor: pointer;
             transition: background-color 0.3s, transform 0.1s;
-            box-shadow: 0 4px 10px rgba(76, 175, 80, 0.3);
+            box-shadow: 0 4px 10px rgba(241, 101, 35, 0.4);
         }
 
         button:hover {
-            background-color: #388e3c;
+            background-color: #d85213;
         }
 
         button:active {
