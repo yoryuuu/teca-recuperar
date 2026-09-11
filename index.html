@@ -142,50 +142,118 @@
 </div>
 
 <script>
-    const PLAYFAB_TITLE_ID = "102CAA"; 
+    // URL de nuestro Cloudflare Worker
+    const WORKER_URL =
+        "https://teca-reset-password.aeonworksofficial.workers.dev";
 
-    // Obtener el token de la URL (soporta ?token= o ?Token=)
+    // Obtener el token de recuperación desde la URL
     const urlParams = new URLSearchParams(window.location.search);
-    const token = urlParams.get('token') || urlParams.get('Token');
+    const token = urlParams.get("token") || urlParams.get("Token");
 
-    const messageDiv = document.getElementById('statusMessage');
+    const messageDiv = document.getElementById("statusMessage");
+    const boton = document.querySelector("button");
 
+    // Si no hay token, significa que la persona no llegó
+    // desde el enlace del correo de PlayFab.
     if (!token) {
         messageDiv.className = "message error";
-        messageDiv.innerText = "Atención: Para cambiar la contraseña debés ingresar desde el enlace que recibiste por correo electrónico.";
+        messageDiv.innerText =
+            "Atención: Para cambiar la contraseña debés ingresar desde el enlace que recibiste por correo electrónico.";
     }
 
     async function cambiarContrasena() {
-    const pass = document.getElementById('newPassword').value;
-    const confirmPass = document.getElementById('confirmPassword').value;
 
-    if (!token) {
-        messageDiv.className = "message error";
-        messageDiv.innerText =
-            "Error: no se recibió el token de recuperación.";
-        return;
+        const pass =
+            document.getElementById("newPassword").value;
+
+        const confirmPass =
+            document.getElementById("confirmPassword").value;
+
+        // Verificar token
+        if (!token) {
+            messageDiv.className = "message error";
+            messageDiv.innerText =
+                "Error: no se recibió el enlace de recuperación correctamente.";
+            return;
+        }
+
+        // Verificar longitud
+        if (pass.length < 6) {
+            messageDiv.className = "message error";
+            messageDiv.innerText =
+                "La contraseña debe tener al menos 6 caracteres.";
+            return;
+        }
+
+        // Verificar coincidencia
+        if (pass !== confirmPass) {
+            messageDiv.className = "message error";
+            messageDiv.innerText =
+                "Las contraseñas no coinciden.";
+            return;
+        }
+
+        // Desactivar botón mientras se procesa
+        boton.disabled = true;
+        boton.innerText = "Cambiando contraseña...";
+
+        messageDiv.className = "message";
+        messageDiv.innerText = "";
+
+        try {
+
+            const respuesta = await fetch(WORKER_URL, {
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({
+                    token: token,
+                    password: pass
+                })
+            });
+
+            const resultado = await respuesta.json();
+
+            console.log("Respuesta del servidor:", resultado);
+
+            if (respuesta.ok && resultado.success) {
+
+                messageDiv.className = "message success";
+
+                messageDiv.innerText =
+                    "¡Contraseña cambiada! Ya podés volver a Teca Saludable e ingresar con tu nueva contraseña.";
+
+                boton.disabled = true;
+                boton.innerText = "Contraseña cambiada";
+
+            } else {
+
+                messageDiv.className = "message error";
+
+                messageDiv.innerText =
+                    resultado.message ||
+                    "No se pudo cambiar la contraseña. El enlace puede haber expirado o ya haber sido utilizado.";
+
+                boton.disabled = false;
+                boton.innerText = "Cambiar Contraseña";
+            }
+
+        } catch (error) {
+
+            console.error("Error comunicándose con Cloudflare:", error);
+
+            messageDiv.className = "message error";
+
+            messageDiv.innerText =
+                "No se pudo conectar con el servidor. Intentá nuevamente.";
+
+            boton.disabled = false;
+            boton.innerText = "Cambiar Contraseña";
+        }
     }
-
-    if (pass.length < 6) {
-        messageDiv.className = "message error";
-        messageDiv.innerText =
-            "La contraseña debe tener al menos 6 caracteres.";
-        return;
-    }
-
-    if (pass !== confirmPass) {
-        messageDiv.className = "message error";
-        messageDiv.innerText =
-            "Las contraseñas no coinciden.";
-        return;
-    }
-
-    messageDiv.className = "message success";
-    messageDiv.innerText =
-        "Prueba correcta: el token de recuperación llegó correctamente.";
-    
-    console.log("TOKEN RECIBIDO:", token);
-}
 </script>
 
 </body>
